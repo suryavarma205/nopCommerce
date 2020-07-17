@@ -23,6 +23,12 @@ namespace Nop.Data
         /// MySQL
         /// </summary>
         [EnumMember(Value = "mysql")]
-        MySql
+        MySql,
+
+        /// <summary>
+        /// SQLite
+        /// </summary>
+        [EnumMember(Value = "sqlite")]
+        SqLite
     }
 }

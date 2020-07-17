@@ -12,6 +12,7 @@ using FluentMigrator.Infrastructure;
 using FluentMigrator.Model;
 using FluentMigrator.Runner;
 using FluentMigrator.Runner.Initialization;
+using LinqToDB.Mapping;
 using Nop.Core;
 using Nop.Core.Infrastructure;
 using Nop.Data.Mapping;
@@ -80,6 +81,12 @@ namespace Nop.Data.Migrations
         protected virtual void DefineByOwnType(Type type, CreateTableExpressionBuilder create, PropertyInfo propertyInfo, bool canBeNullable = false)
         {
             var propType = propertyInfo.PropertyType;
+
+            if(!propertyInfo.CanWrite)
+                return;
+
+            if (propertyInfo.CustomAttributes.Any(ca => ca.AttributeType == typeof(NotColumnAttribute)))
+                return;
 
             if (Nullable.GetUnderlyingType(propType) is Type uType)
             {

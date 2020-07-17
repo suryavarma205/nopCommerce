@@ -25,19 +25,14 @@ namespace Nop.Data.Migrations
             if (dataSettings is null)
                 Processor = procs.FirstOrDefault();
             else
-            {
-                switch (dataSettings.DataProvider)
+                Processor = dataSettings.DataProvider switch
                 {
-                    case DataProviderType.SqlServer:
-                        Processor = FindGenerator(procs, "SqlServer");
-                        break;
-                    case DataProviderType.MySql:
-                        Processor = FindGenerator(procs, "MySQL");
-                        break;
-                    default:
-                        throw new ProcessorFactoryNotFoundException($@"A migration generator for Data provider type {dataSettings.DataProvider} couldn't be found.");
-                }
-            }
+                    DataProviderType.SqlServer => FindGenerator(procs, "SqlServer"),
+                    DataProviderType.MySql => FindGenerator(procs, "MySQL"),
+                    DataProviderType.SqLite => FindGenerator(procs, "SQLite"),
+                    _ => throw new ProcessorFactoryNotFoundException(
+                        $@"A migration generator for Data provider type {dataSettings.DataProvider} couldn't be found.")
+                };
         }
 
         #endregion

@@ -114,6 +114,9 @@
   <LocaleResource Name="SqlAuthentication">
     <Value>Use SQL Server account</Value>
   </LocaleResource>
+  <LocaleResource Name="SqLite">
+      <Value>SQLite database (only fore tests! Do not use for production)</Value>
+  </LocaleResource>
   <LocaleResource Name="SqlPassword">
     <Value>SQL Password</Value>
   </LocaleResource>

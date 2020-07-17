@@ -1,5 +1,6 @@
 ﻿using System;
 using FluentMigrator.Runner.VersionTableInfo;
+using LinqToDB.Mapping;
 using Nop.Core;
 
 namespace Nop.Data.Migrations
@@ -48,6 +49,7 @@ namespace Nop.Data.Migrations
         /// implementing <code>IVersionTableMetaData</code> and before any of properties of <code>IVersionTableMetaData</code>
         /// is called. Properties can use <code>ApplicationContext</code> value to implement context-depending logic.
         /// </remarks>
+        [NotColumn]
         public object ApplicationContext { get; set; }
 
         /// <summary>

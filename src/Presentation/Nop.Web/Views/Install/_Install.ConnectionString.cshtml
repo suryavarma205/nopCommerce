@@ -2,7 +2,7 @@
 
     <div id="sqlDatabaseInfo">
         <div class="credentials">
-            <div class="form-group">
+            <div class="form-group" id="fildServerName">
                 <div class="col-xs-4">
                     <label class="control-label">
                         @ILS.GetResource("ServerName")
@@ -23,7 +23,7 @@
                 </div>
             </div>
         </div>
-        <div class="form-group">
+        <div class="form-group" id="pnlIntegratedSecurity">
             <div class="col-xs-7 col-xs-offset-4">
                 <div class="checkbox">
                     <label>
@@ -34,7 +34,7 @@
             </div>
         </div>
         <div class="credentials" id="pnlSqlServerCredentials">
-            <div class="form-group">
+            <div class="form-group" id="fildSqlUsername">
                 <div class="col-xs-4">
                     <label class="control-label">
                         @ILS.GetResource("SqlUsername")
@@ -59,11 +59,11 @@
 
 <script>
 
-    $(document).ready(function () {
+    $(document).ready(function() {
         $('#@Html.IdFor(x => x.IntegratedSecurity)').click(toggleSqlAuthenticationType);
 
         toggleSqlAuthenticationType();
-    })
+    });
 
     function toggleSqlAuthenticationType() {
         var sqlAuthentication = $("#@Html.IdFor(x => x.IntegratedSecurity)").is(':checked');

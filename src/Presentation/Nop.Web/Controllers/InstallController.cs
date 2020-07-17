@@ -155,7 +155,7 @@ namespace Nop.Web.Controllers
 
                 DataSettingsManager.LoadSettings(reloadSettings: true);
 
-                if (model.CreateDatabaseIfNotExists)
+                if (model.CreateDatabaseIfNotExists || model.DataProvider == DataProviderType.SqLite)
                 {
                     try
                     {

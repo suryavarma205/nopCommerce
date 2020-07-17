@@ -47,6 +47,7 @@
             <div class="content">
                 <div asp-validation-summary="All" class="message-error"></div>
 
+                @*TODO: Delete resource*@
                 @*<p>@ILS.GetResource("Tooltip1")</p>*@
                 <p>@ILS.GetResource("Tooltip2")</p>
                 <p>@ILS.GetResource("Documentation1") <a href="http://docs.nopcommerce.com/dashboard.action?utm_source=installation-page&utm_medium=footer&utm_campaign=installation-page" target="_blank">@ILS.GetResource("Documentation2")</a>.</p>
@@ -88,15 +89,38 @@
 
                     $(document).ready(function () {
                         $('#@Html.IdFor(m => m.DataProvider)').on('change', function() {
-                            var integratedSecurityProviders = ['@((int)DataProviderType.SqlServer)']
+                            var integratedSecurityProviders = ['@((int)DataProviderType.SqlServer)'];
                             if(!integratedSecurityProviders.includes($(this).val())) {
                                 $('#@Html.IdFor(x => x.IntegratedSecurity)').prop('checked', false);
-                                $('#@Html.IdFor(x => x.IntegratedSecurity)').prop('disabled', true)
+                                $('#pnlIntegratedSecurity').hide();
 
                                 toggleSqlAuthenticationType();
                             } else {
-                                $('#@Html.IdFor(x => x.IntegratedSecurity)').prop('disabled', false)
+                                $('#pnlIntegratedSecurity').show();
                             }
+
+                            var isSQLite = '@((int)DataProviderType.SqLite)' === $(this).val();
+
+                            console.log(isSQLite, @((int)DataProviderType.SqLite), $(this).val());
+
+                            if (isSQLite) {
+                                $('#fildSqlUsername').hide();
+                                $('#fildServerName').hide();
+                                $('#@Html.IdFor(x => x.ConnectionStringRaw)').prop('checked', false);
+                                $('#@Html.IdFor(x => x.ConnectionStringRaw)').prop('disabled', true);
+                                $('#@Html.IdFor(x => x.CreateDatabaseIfNotExists)').prop('checked', true);
+                                $('#@Html.IdFor(x => x.CreateDatabaseIfNotExists)').prop('disabled', true);
+                                $('#@Html.IdFor(x => x.UseCustomCollation)').prop('checked', false);
+                                $('#@Html.IdFor(x => x.UseCustomCollation)').prop('disabled', true);
+
+                            } else {
+                                $('#fildSqlUsername').show();
+                                $('#fildServerName').show();
+                                $('#@Html.IdFor(x => x.ConnectionStringRaw)').prop('disabled', false);
+                                $('#@Html.IdFor(x => x.CreateDatabaseIfNotExists)').prop('disabled', false);
+                                $('#@Html.IdFor(x => x.UseCustomCollation)').prop('disabled', false);
+                            }
+
                         });
                     });
 

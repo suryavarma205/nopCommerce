@@ -1,4 +1,5 @@
 ﻿using FluentValidation.TestHelper;
+using Nop.Tests;
 using Nop.Web.Models.Boards;
 using Nop.Web.Validators.Boards;
 using NUnit.Framework;
@@ -6,18 +7,18 @@ using NUnit.Framework;
 namespace Nop.Web.MVC.Tests.Public.Validators.Boards
 {
     [TestFixture]
-    public class EditForumTopicValidatorTests : BaseValidatorTests
+    public class EditForumTopicValidatorTests : BaseNopTest
     {
         private EditForumTopicValidator _validator;
         
         [SetUp]
-        public new void Setup()
+        public void Setup()
         {
-            _validator = new EditForumTopicValidator(_localizationService);
+            _validator = GetService<EditForumTopicValidator>();
         }
 
         [Test]
-        public void Should_have_error_when_subject_is_null_or_empty()
+        public void ShouldHaveErrorWhenSubjectIsNullOrEmpty()
         {
             var model = new EditForumTopicModel
             {
@@ -29,7 +30,7 @@ namespace Nop.Web.MVC.Tests.Public.Validators.Boards
         }
 
         [Test]
-        public void Should_not_have_error_when_subject_is_specified()
+        public void ShouldNotHaveErrorWhenSubjectIsSpecified()
         {
             var model = new EditForumTopicModel
             {
@@ -39,7 +40,7 @@ namespace Nop.Web.MVC.Tests.Public.Validators.Boards
         }
 
         [Test]
-        public void Should_have_error_when_text_is_null_or_empty()
+        public void ShouldHaveErrorWhenTextIsNullOrEmpty()
         {
             var model = new EditForumTopicModel
             {
@@ -51,7 +52,7 @@ namespace Nop.Web.MVC.Tests.Public.Validators.Boards
         }
 
         [Test]
-        public void Should_not_have_error_when_text_is_specified()
+        public void ShouldNotHaveErrorWhenTextIsSpecified()
         {
             var model = new EditForumTopicModel
             {

@@ -1,4 +1,5 @@
 ﻿using FluentValidation.TestHelper;
+using Nop.Tests;
 using Nop.Web.Models.PrivateMessages;
 using Nop.Web.Validators.PrivateMessages;
 using NUnit.Framework;
@@ -6,18 +7,18 @@ using NUnit.Framework;
 namespace Nop.Web.MVC.Tests.Public.Validators.PrivateMessages
 {
     [TestFixture]
-    public class SendPrivateMessageValidatorTests : BaseValidatorTests
+    public class SendPrivateMessageValidatorTests : BaseNopTest
     {
         private SendPrivateMessageValidator _validator;
         
         [SetUp]
-        public new void Setup()
+        public void Setup()
         {
-            _validator = new SendPrivateMessageValidator(_localizationService);
+            _validator = GetService<SendPrivateMessageValidator>();
         }
 
         [Test]
-        public void Should_have_error_when_subject_is_null_or_empty()
+        public void ShouldHaveErrorWhenSubjectIsNullOrEmpty()
         {
             var model = new SendPrivateMessageModel
             {
@@ -29,7 +30,7 @@ namespace Nop.Web.MVC.Tests.Public.Validators.PrivateMessages
         }
 
         [Test]
-        public void Should_not_have_error_when_subject_is_specified()
+        public void ShouldNotHaveErrorWhenSubjectIsSpecified()
         {
             var model = new SendPrivateMessageModel
             {
@@ -39,7 +40,7 @@ namespace Nop.Web.MVC.Tests.Public.Validators.PrivateMessages
         }
 
         [Test]
-        public void Should_have_error_when_message_is_null_or_empty()
+        public void ShouldHaveErrorWhenMessageIsNullOrEmpty()
         {
             var model = new SendPrivateMessageModel
             {
@@ -51,7 +52,7 @@ namespace Nop.Web.MVC.Tests.Public.Validators.PrivateMessages
         }
 
         [Test]
-        public void Should_not_have_error_when_message_is_specified()
+        public void ShouldNotHaveErrorWhenMessageIsSpecified()
         {
             var model = new SendPrivateMessageModel
             {

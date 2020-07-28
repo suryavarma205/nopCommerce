@@ -1,8 +1,9 @@
 ﻿using FluentValidation.TestHelper;
-using Moq;
 using Nop.Core.Domain.Common;
 using Nop.Core.Domain.Customers;
 using Nop.Services.Directory;
+using Nop.Services.Localization;
+using Nop.Tests;
 using Nop.Web.Models.Common;
 using Nop.Web.Validators.Common;
 using NUnit.Framework;
@@ -10,18 +11,20 @@ using NUnit.Framework;
 namespace Nop.Web.MVC.Tests.Public.Validators.Common
 {
     [TestFixture]
-    public class AddressValidatorTests : BaseValidatorTests
+    public class AddressValidatorTests : BaseNopTest
     {
+        private ILocalizationService _localizationService;
         private IStateProvinceService _stateProvinceService;
 
         [SetUp]
-        public new void Setup()
+        public void Setup()
         {
-            _stateProvinceService = new Mock<IStateProvinceService>().Object;
+            _localizationService = GetService<ILocalizationService>();
+            _stateProvinceService = GetService<IStateProvinceService>();
         }
 
         [Test]
-        public void Should_have_error_when_email_is_null_or_empty()
+        public void ShouldHaveErrorWhenEmailIsNullOrEmpty()
         {
             var validator = new AddressValidator(_localizationService, _stateProvinceService,
                 new AddressSettings(), new CustomerSettings());
@@ -34,8 +37,9 @@ namespace Nop.Web.MVC.Tests.Public.Validators.Common
             model.Email = "";
             validator.ShouldHaveValidationErrorFor(x => x.Email, model);
         }
+
         [Test]
-        public void Should_have_error_when_email_is_wrong_format()
+        public void ShouldHaveErrorWhenEmailIsWrongFormat()
         {
             var validator = new AddressValidator(_localizationService, _stateProvinceService,
                 new AddressSettings(), new CustomerSettings());
@@ -46,8 +50,9 @@ namespace Nop.Web.MVC.Tests.Public.Validators.Common
             };
             validator.ShouldHaveValidationErrorFor(x => x.Email, model);
         }
+
         [Test]
-        public void Should_not_have_error_when_email_is_correct_format()
+        public void ShouldNotHaveErrorWhenEmailIsCorrectFormat()
         {
             var validator = new AddressValidator(_localizationService, _stateProvinceService,
                 new AddressSettings(), new CustomerSettings());
@@ -60,7 +65,7 @@ namespace Nop.Web.MVC.Tests.Public.Validators.Common
         }
 
         [Test]
-        public void Should_have_error_when_firstName_is_null_or_empty()
+        public void ShouldHaveErrorWhenFirstnameIsNullOrEmpty()
         {
             var validator = new AddressValidator(_localizationService, _stateProvinceService,
                 new AddressSettings(), new CustomerSettings());
@@ -73,8 +78,9 @@ namespace Nop.Web.MVC.Tests.Public.Validators.Common
             model.FirstName = "";
             validator.ShouldHaveValidationErrorFor(x => x.FirstName, model);
         }
+
         [Test]
-        public void Should_not_have_error_when_firstName_is_specified()
+        public void ShouldNotHaveErrorWhenFirstnameIsSpecified()
         {
             var validator = new AddressValidator(_localizationService, _stateProvinceService,
                 new AddressSettings(), new CustomerSettings());
@@ -87,7 +93,7 @@ namespace Nop.Web.MVC.Tests.Public.Validators.Common
         }
 
         [Test]
-        public void Should_have_error_when_lastName_is_null_or_empty()
+        public void ShouldHaveErrorWhenLastnameIsNullOrEmpty()
         {
             var validator = new AddressValidator(_localizationService, _stateProvinceService,
                 new AddressSettings(), new CustomerSettings());
@@ -100,8 +106,9 @@ namespace Nop.Web.MVC.Tests.Public.Validators.Common
             model.LastName = "";
             validator.ShouldHaveValidationErrorFor(x => x.LastName, model);
         }
+
         [Test]
-        public void Should_not_have_error_when_lastName_is_specified()
+        public void ShouldNotHaveErrorWhenLastnameIsSpecified()
         {
             var validator = new AddressValidator(_localizationService, _stateProvinceService,
                 new AddressSettings(), new CustomerSettings());
@@ -114,7 +121,7 @@ namespace Nop.Web.MVC.Tests.Public.Validators.Common
         }
 
         [Test]
-        public void Should_have_error_when_company_is_null_or_empty_based_on_required_setting()
+        public void ShouldHaveErrorWhenCompanyIsNullOrEmptyBasedOnRequiredSetting()
         {
             var model = new AddressModel();
 
@@ -129,8 +136,7 @@ namespace Nop.Web.MVC.Tests.Public.Validators.Common
             validator.ShouldHaveValidationErrorFor(x => x.Company, model);
             model.Company = "";
             validator.ShouldHaveValidationErrorFor(x => x.Company, model);
-
-
+            
             //not required
             validator = new AddressValidator(_localizationService, _stateProvinceService,
                 new AddressSettings
@@ -143,8 +149,9 @@ namespace Nop.Web.MVC.Tests.Public.Validators.Common
             model.Company = "";
             validator.ShouldNotHaveValidationErrorFor(x => x.Company, model);
         }
+
         [Test]
-        public void Should_not_have_error_when_company_is_specified()
+        public void ShouldNotHaveErrorWhenCompanyIsSpecified()
         {
             var validator = new AddressValidator(_localizationService, _stateProvinceService,
                 new AddressSettings
@@ -160,7 +167,7 @@ namespace Nop.Web.MVC.Tests.Public.Validators.Common
         }
 
         [Test]
-        public void Should_have_error_when_streetaddress_is_null_or_empty_based_on_required_setting()
+        public void ShouldHaveErrorWhenStreetAddressIsNullOrEmptyBasedOnRequiredSetting()
         {
             var model = new AddressModel();
 
@@ -188,8 +195,9 @@ namespace Nop.Web.MVC.Tests.Public.Validators.Common
             model.Address1 = "";
             validator.ShouldNotHaveValidationErrorFor(x => x.Address1, model);
         }
+
         [Test]
-        public void Should_not_have_error_when_streetaddress_is_specified()
+        public void ShouldNotHaveErrorWhenStreetAddressIsSpecified()
         {
             var validator = new AddressValidator(_localizationService, _stateProvinceService,
                 new AddressSettings
@@ -205,7 +213,7 @@ namespace Nop.Web.MVC.Tests.Public.Validators.Common
         }
 
         [Test]
-        public void Should_have_error_when_streetaddress2_is_null_or_empty_based_on_required_setting()
+        public void ShouldHaveErrorWhenStreetAddress2IsNullOrEmptyBasedOnRequiredSetting()
         {
             var model = new AddressModel();
 
@@ -233,8 +241,9 @@ namespace Nop.Web.MVC.Tests.Public.Validators.Common
             model.Address2 = "";
             validator.ShouldNotHaveValidationErrorFor(x => x.Address2, model);
         }
+
         [Test]
-        public void Should_not_have_error_when_streetaddress2_is_specified()
+        public void ShouldNotHaveErrorWhenStreetAddress2IsSpecified()
         {
             var validator = new AddressValidator(_localizationService, _stateProvinceService,
                 new AddressSettings
@@ -250,7 +259,7 @@ namespace Nop.Web.MVC.Tests.Public.Validators.Common
         }
 
         [Test]
-        public void Should_have_error_when_zippostalcode_is_null_or_empty_based_on_required_setting()
+        public void ShouldHaveErrorWhenZipPostalCodeIsNullOrEmptyBasedOnRequiredSetting()
         {
             var model = new AddressModel();
 
@@ -279,8 +288,9 @@ namespace Nop.Web.MVC.Tests.Public.Validators.Common
             model.ZipPostalCode = "";
             validator.ShouldNotHaveValidationErrorFor(x => x.ZipPostalCode, model);
         }
+
         [Test]
-        public void Should_not_have_error_when_zippostalcode_is_specified()
+        public void ShouldNotHaveErrorWhenZipPostalCodeIsSpecified()
         {
             var validator = new AddressValidator(_localizationService, _stateProvinceService,
                 new AddressSettings
@@ -296,7 +306,7 @@ namespace Nop.Web.MVC.Tests.Public.Validators.Common
         }
 
         [Test]
-        public void Should_have_error_when_city_is_null_or_empty_based_on_required_setting()
+        public void ShouldHaveErrorWhenCityIsNullOrEmptyBasedOnRequiredSetting()
         {
             var model = new AddressModel();
 
@@ -325,8 +335,9 @@ namespace Nop.Web.MVC.Tests.Public.Validators.Common
             model.City = "";
             validator.ShouldNotHaveValidationErrorFor(x => x.City, model);
         }
+
         [Test]
-        public void Should_not_have_error_when_city_is_specified()
+        public void ShouldNotHaveErrorWhenCityIsSpecified()
         {
             var validator = new AddressValidator(_localizationService, _stateProvinceService,
                 new AddressSettings
@@ -342,7 +353,7 @@ namespace Nop.Web.MVC.Tests.Public.Validators.Common
         }
 
         [Test]
-        public void Should_have_error_when_phone_is_null_or_empty_based_on_required_setting()
+        public void ShouldHaveErrorWhenPhoneIsNullOrEmptyBasedOnRequiredSetting()
         {
             var model = new AddressModel();
 
@@ -370,8 +381,9 @@ namespace Nop.Web.MVC.Tests.Public.Validators.Common
             model.PhoneNumber = "";
             validator.ShouldNotHaveValidationErrorFor(x => x.PhoneNumber, model);
         }
+
         [Test]
-        public void Should_not_have_error_when_phone_is_specified()
+        public void ShouldNotHaveErrorWhenPhoneIsSpecified()
         {
             var validator = new AddressValidator(_localizationService, _stateProvinceService,
                 new AddressSettings
@@ -387,7 +399,7 @@ namespace Nop.Web.MVC.Tests.Public.Validators.Common
         }
 
         [Test]
-        public void Should_have_error_when_fax_is_null_or_empty_based_on_required_setting()
+        public void ShouldHaveErrorWhenFaxIsNullOrEmptyBasedOnRequiredSetting()
         {
             var model = new AddressModel();
 
@@ -416,8 +428,9 @@ namespace Nop.Web.MVC.Tests.Public.Validators.Common
             model.FaxNumber = "";
             validator.ShouldNotHaveValidationErrorFor(x => x.FaxNumber, model);
         }
+
         [Test]
-        public void Should_not_have_error_when_fax_is_specified()
+        public void ShouldNotHaveErrorWhenFaxIsSpecified()
         {
             var validator = new AddressValidator(_localizationService, _stateProvinceService,
                 new AddressSettings

@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using FluentMigrator;
 using FluentMigrator.Runner;
 using FluentMigrator.Runner.Conventions;
@@ -10,8 +8,12 @@ using FluentMigrator.Runner.Initialization;
 using FluentMigrator.Runner.Processors;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -20,12 +22,11 @@ using Moq;
 using Nop.Core;
 using Nop.Core.Caching;
 using Nop.Core.Configuration;
-using Nop.Core.Domain.Stores;
+using Nop.Core.Domain.Customers;
 using Nop.Core.Infrastructure;
 using Nop.Data;
 using Nop.Data.Migrations;
 using Nop.Services.Affiliates;
-using Nop.Services.Authentication;
 using Nop.Services.Authentication.External;
 using Nop.Services.Blogs;
 using Nop.Services.Caching;
@@ -63,6 +64,8 @@ using Nop.Services.Themes;
 using Nop.Services.Topics;
 using Nop.Services.Vendors;
 using Nop.Web.Framework;
+using Nop.Web.Infrastructure.Installation;
+using IAuthenticationService = Nop.Services.Authentication.IAuthenticationService;
 
 namespace Nop.Tests
 {
@@ -75,11 +78,11 @@ namespace Nop.Tests
             var services = new ServiceCollection();
 
             var memoryCache = new MemoryCache(new MemoryCacheOptions());
-            var typeFinder = new TestTypeFinder();
+            var typeFinder = new AppDomainTypeFinder();
 
             Singleton<DataSettings>.Instance = new DataSettings
             {
-                ConnectionString = "Data Source=nopCommerceTest;Cache=Shared",
+                ConnectionString = "Data Source=nopCommerceTest.sqlite;Cache=Shared",
                 //ConnectionString = "Data Source=e:\\test.sql",
                 DataProvider = DataProviderType.SqLite
             };
@@ -109,29 +112,33 @@ namespace Nop.Tests
             webHostEnvironment.Setup(p => p.EnvironmentName).Returns("test");
             webHostEnvironment.Setup(p => p.ApplicationName).Returns("nopCommerce");
             services.AddSingleton(webHostEnvironment.Object);
-            
-            var httpContextAccessor = new Mock<IHttpContextAccessor>();
-            httpContextAccessor.Setup(p => p.HttpContext).Returns(new DefaultHttpContext
-            {
-                Request = { Headers = { { HeaderNames.Host, "127.0.0.1"} }}
-            });
 
-            //_httpContextAccessor.HttpContext.Request.Headers[HeaderNames.Host]
+            var httpContext = new DefaultHttpContext {Request = {Headers = {{HeaderNames.Host, "127.0.0.1"}}}};
+
+            var httpContextAccessor = new Mock<IHttpContextAccessor>();
+            httpContextAccessor.Setup(p => p.HttpContext).Returns(httpContext);
 
             services.AddSingleton(httpContextAccessor.Object);
 
             var actionContextAccessor = new Mock<IActionContextAccessor>();
+            actionContextAccessor.Setup(x => x.ActionContext).Returns(new ActionContext(httpContext, new RouteData(), new ActionDescriptor()));
+
             services.AddSingleton(actionContextAccessor.Object);
 
             var urlHelperFactory=new Mock<IUrlHelperFactory>();
+
+            urlHelperFactory.Setup(x => x.GetUrlHelper(It.IsAny<ActionContext>()))
+                .Returns(new UrlHelper(actionContextAccessor.Object.ActionContext));
+
             services.AddSingleton(urlHelperFactory.Object);
 
-            //var storeContext = new Mock<IStoreContext>();
-            //storeContext.Setup(p => p.CurrentStore).Returns(_serviceProvider.GetService<IRepository<Store>>().Table.First());
-            //services.AddSingleton(storeContext.Object);
+            var tempDataDictionaryFactory = new Mock<ITempDataDictionaryFactory>();
+            var dataDictionary = new TempDataDictionary(httpContextAccessor.Object.HttpContext, new Mock<ITempDataProvider>().Object);
+            tempDataDictionaryFactory.Setup(f => f.GetTempData(It.IsAny<HttpContext>())).Returns(dataDictionary);
+            services.AddSingleton(tempDataDictionaryFactory.Object);
 
             #endregion
-            
+
             services.AddSingleton<ITypeFinder>(typeFinder);
 
             //file provider
@@ -207,6 +214,7 @@ namespace Nop.Tests
             services.AddTransient<IDiscountService, DiscountService>();
             services.AddTransient<ILocalizationService, LocalizationService>();
             services.AddTransient<ILocalizedEntityService, LocalizedEntityService>();
+            services.AddTransient<IInstallationLocalizationService, InstallationLocalizationService>();
             services.AddTransient<ILanguageService, LanguageService>();
             services.AddTransient<IDownloadService, DownloadService>();
             services.AddTransient<IMessageTemplateService, MessageTemplateService>();
@@ -234,7 +242,7 @@ namespace Nop.Tests
             services.AddTransient<ICustomNumberFormatter, CustomNumberFormatter>();
             services.AddTransient<IPaymentService, PaymentService>();
             services.AddTransient<IEncryptionService, EncryptionService>();
-            services.AddTransient<IAuthenticationService, CookieAuthenticationService>();
+            services.AddTransient<IAuthenticationService, TestAuthenticationService>();
             services.AddTransient<IUrlRecordService, UrlRecordService>();
             services.AddTransient<IShipmentService, ShipmentService>();
             services.AddTransient<IShippingService, ShippingService>();
@@ -318,6 +326,9 @@ namespace Nop.Tests
 
             EngineContext.Replace(new NopTestEngine(_serviceProvider));
 
+            if(File.Exists("nopCommerceTest.sqlite") && File.GetCreationTimeUtc("nopCommerceTest.sqlite").AddDays(1) > DateTime.UtcNow)
+                return;
+
             _serviceProvider.GetService<INopDataProvider>().CreateDatabase(null);
             _serviceProvider.GetService<INopDataProvider>().InitializeDatabase();
             
@@ -330,60 +341,25 @@ namespace Nop.Tests
 
         public T GetService<T>()
         {
-            return _serviceProvider.GetRequiredService<T>();
+            try
+            {
+                return _serviceProvider.GetRequiredService<T>();
+            }
+            catch (InvalidOperationException)
+            {
+                return (T)EngineContext.Current.ResolveUnregistered(typeof(T));
+            }
         }
 
         #region Nested classes
-
-        protected class TestTypeFinder : ITypeFinder
-        {
-            protected readonly List<Assembly> _assemblies = new List<Assembly>();
-
-            protected List<Type> _types;
-
-            public TestTypeFinder()
-            {
-                _assemblies.Add(typeof(Store).Assembly);
-                _assemblies.Add(typeof(IDataProviderManager).Assembly);
-                _assemblies.Add(typeof(IStoreService).Assembly);
-
-                _types = _assemblies.SelectMany(a => a.GetTypes()).ToList();
-            }
-
-            public IList<Assembly> GetAssemblies()
-            {
-                return _assemblies.ToList();
-            }
-
-            public IEnumerable<Type> FindClassesOfType(Type assignTypeFrom, bool onlyConcreteClasses = true)
-            {
-                return (from t in _types
-                        where !t.IsInterface && assignTypeFrom.IsAssignableFrom(t) && (onlyConcreteClasses ? (t.IsClass && !t.IsAbstract) : true)
-                        select t).ToList();
-            }
-
-            public IEnumerable<Type> FindClassesOfType<T>(bool onlyConcreteClasses = true)
-            {
-                return FindClassesOfType(typeof(T), onlyConcreteClasses);
-            }
-
-            public IEnumerable<Type> FindClassesOfType(Type assignTypeFrom, IEnumerable<Assembly> assemblies, bool onlyConcreteClasses = true)
-            {
-                return FindClassesOfType(assignTypeFrom, onlyConcreteClasses);
-            }
-
-            public IEnumerable<Type> FindClassesOfType<T>(IEnumerable<Assembly> assemblies, bool onlyConcreteClasses = true)
-            {
-                return FindClassesOfType(typeof(T), onlyConcreteClasses);
-            }
-        }
-
+        
         protected class NopTestConventionSet : NopConventionSet
         {
             public NopTestConventionSet(INopDataProvider dataProvider) : base(dataProvider)
             {
             }
         }
+
         public partial class NopTestEngine : NopEngine
         {
             protected readonly IServiceProvider _internalServiceProvider;
@@ -394,6 +370,24 @@ namespace Nop.Tests
             }
 
             public override IServiceProvider ServiceProvider => _internalServiceProvider;
+        }
+
+        public class TestAuthenticationService : IAuthenticationService
+        {
+            public void SignIn(Customer customer, bool isPersistent)
+            {
+
+            }
+
+            public void SignOut()
+            {
+
+            }
+
+            public Customer GetAuthenticatedCustomer()
+            {
+                return _serviceProvider.GetService<ICustomerService>().GetCustomerByEmail("test@nopCommerce.com");
+            }
         }
 
         #endregion

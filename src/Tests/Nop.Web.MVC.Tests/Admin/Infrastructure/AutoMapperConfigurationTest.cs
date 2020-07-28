@@ -9,7 +9,7 @@ namespace Nop.Web.MVC.Tests.Admin.Infrastructure
     public class AutoMapperConfigurationTest
     {
         [Test]
-        public void Configuration_is_valid()
+        public void ConfigurationIsValid()
         {
             var config = new MapperConfiguration(cfg => {
                 

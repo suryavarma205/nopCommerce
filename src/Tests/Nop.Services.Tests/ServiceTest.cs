@@ -28,7 +28,7 @@ namespace Nop.Services.Tests
 
         public void RunWithTestServiceProvider(Action action)
         {
-            EngineContext.Replace(new FakeNopEngine());
+            EngineContext.Replace(new BaseNopTest.NopTestEngine(new TestServiceProvider()));
 
             action();
 
@@ -89,16 +89,6 @@ namespace Nop.Services.Tests
                     }
                 }
             };
-        }
-        
-        public class FakeNopEngine : NopEngine
-        {
-            public FakeNopEngine(IServiceProvider serviceProvider = null)
-            {
-                ServiceProvider = serviceProvider ?? new TestServiceProvider();
-            }
-
-            public override IServiceProvider ServiceProvider { get; }
         }
     }
 }

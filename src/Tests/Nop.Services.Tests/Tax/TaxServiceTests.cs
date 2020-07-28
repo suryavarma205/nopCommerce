@@ -160,7 +160,7 @@ namespace Nop.Services.Tests.Tax
         public void Can_load_active_taxProvider()
         {
             var serviceProvider = new FakeServiceProvider(_genericAttributeService.Object, _taxService, _taxSettings);
-            var nopEngine = new FakeNopEngine(serviceProvider);
+            var nopEngine = new BaseNopTest.NopTestEngine(serviceProvider);
             EngineContext.Replace(nopEngine);
 
             var provider = _taxPluginManager.LoadPrimaryPlugin();
@@ -226,7 +226,7 @@ namespace Nop.Services.Tests.Tax
             var product = new Product();
 
             var serviceProvider = new FakeServiceProvider(_genericAttributeService.Object, _taxService, _taxSettings);
-            var nopEngine = new FakeNopEngine(serviceProvider);
+            var nopEngine = new BaseNopTest.NopTestEngine(serviceProvider);
             EngineContext.Replace(nopEngine);
             
             _taxService.GetProductPrice(product, 0, 1000M, true, customer, true, out _).Should().Be(1000);
@@ -248,7 +248,7 @@ namespace Nop.Services.Tests.Tax
             customer.IsTaxExempt = true;
 
             var serviceProvider = new FakeServiceProvider(_genericAttributeService.Object, _taxService, _taxSettings);
-            var nopEngine = new FakeNopEngine(serviceProvider);
+            var nopEngine = new BaseNopTest.NopTestEngine(serviceProvider);
             EngineContext.Replace(nopEngine);
 
             _taxService.GetProductPrice(product, 0, 1000M, true, customer, true, out _).Should()

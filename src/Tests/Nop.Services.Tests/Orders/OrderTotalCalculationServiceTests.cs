@@ -221,7 +221,7 @@ namespace Nop.Services.Tests.Orders
             var serviceProvider = new FakeServiceProvider(_shoppingCartService, _paymentService.Object,
                 _genericAttributeService.Object, _orderTotalCalcService, _taxService, _taxSettings);
 
-            var nopEngine = new FakeNopEngine(serviceProvider);
+            var nopEngine = new BaseNopTest.NopTestEngine(serviceProvider);
 
             EngineContext.Replace(nopEngine);
         }

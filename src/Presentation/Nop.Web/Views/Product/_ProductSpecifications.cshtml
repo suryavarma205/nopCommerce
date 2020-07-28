@@ -1,6 +1,23 @@
-﻿@model IList<ProductSpecificationModel>
+﻿@model ProductSpecificationModel
+
 @using Nop.Core.Domain.Catalog;
-@if (Model.Count > 0)
+
+@{
+    var uniqueNonGroupedAttributes = new List<ProductSpecificationAttributeModel>();
+    foreach (var attribute in Model.NonGroupedAttributes)
+    {
+        if (!uniqueNonGroupedAttributes.Any(sa => sa.SpecificationAttributeId == attribute.SpecificationAttributeId))
+            uniqueNonGroupedAttributes.Add(attribute);
+    }
+
+    var uniqueGroupes = new List<ProductSpecificationAttributeGroupModel>();
+    foreach (var group in Model.GroupedAttributes)
+    {
+        if (!uniqueGroupes.Any(g => g.Id == group.Id))
+            uniqueGroupes.Add(group);
+    }
+}
+@if (uniqueNonGroupedAttributes.Count > 0 || uniqueGroupes.SelectMany(g => g.Attributes).ToList().Count > 0)
 {
     <div class="product-specs-box">
         <div class="title">
@@ -15,28 +32,116 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @for (var i = 0; i < Model.Count; i++)
+                    @if (uniqueNonGroupedAttributes.Count > 0)
                     {
-                        var item = Model[i];
-                        <tr @(i % 2 == 0 ? Html.Raw(" class=\"odd\"") : Html.Raw(" class=\"even\""))>
-                            <td class="spec-name">
-                                @item.SpecificationAttributeName
-                            </td>
-                            <td class="spec-value">
-                                @if (!string.IsNullOrEmpty(item.ColorSquaresRgb) && (item.AttributeTypeId == (int)SpecificationAttributeType.Option) )
-                                {
-                                    <div class="attribute-squares color-squares">
-                                        <span class="attribute-square-container" title="@Html.Raw(item.ValueRaw)">
-                                            <span class="attribute-square" style="background-color: @(item.ColorSquaresRgb);">&nbsp;</span>
-                                        </span>
-                                    </div>
-                                }
-                                else
-                                {
-                                    @Html.Raw(item.ValueRaw)
-                                }
-                            </td>
-                        </tr>
+                        @for (var i = 0; i < uniqueNonGroupedAttributes.Count; i++)
+                        {
+                            var item = uniqueNonGroupedAttributes[i];
+                            <tr @(i % 2 == 0 ? Html.Raw(" class=\"odd\"") : Html.Raw(" class=\"even\""))>
+                                <td class="spec-name">
+                                    @item.SpecificationAttributeName
+                                </td>
+                                <td class="spec-value">
+                                    @{
+                                        var foundProductSpeces = Model.NonGroupedAttributes
+                                            .Where(attribute => attribute.SpecificationAttributeId == item.SpecificationAttributeId)
+                                            .ToList();
+                                    }
+
+                                    @if (foundProductSpeces.Count > 0)
+                                    {
+                                        for (int j = 0; j < foundProductSpeces.Count; j++)
+                                        {
+                                            @if (!string.IsNullOrEmpty(item.ColorSquaresRgb) && (item.AttributeTypeId == (int)SpecificationAttributeType.Option))
+                                            {
+                                                <div class="attribute-squares color-squares">
+                                                    <span class="attribute-square-container" title="@Html.Raw(foundProductSpeces[j].ValueRaw)">
+                                                        <span class="attribute-square" style="background-color: @(foundProductSpeces[j].ColorSquaresRgb);">&nbsp;</span>
+                                                    </span>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                @Html.Raw(foundProductSpeces[j].ValueRaw)
+                                            }
+
+                                            if (j != foundProductSpeces.Count - 1)
+                                            {
+                                                <text>,&nbsp;</text>
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <text>&nbsp;</text>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                    @foreach (var group in uniqueGroupes)
+                    {
+                        if (group.Attributes.Count > 0)
+                        {
+                            <tr>
+                                <td class="spec-group-name">
+                                    @group.Name
+                                </td>
+                            </tr>
+
+                            var uniqueGroupAttributes = new List<ProductSpecificationAttributeModel>();
+                            foreach (var attribute in Model.GroupedAttributes.Where(g => g.Id == group.Id).SelectMany(g => g.Attributes))
+                            {
+                                if (!uniqueGroupAttributes.Any(sa => sa.SpecificationAttributeId == attribute.SpecificationAttributeId))
+                                    uniqueGroupAttributes.Add(attribute);
+                            }
+                            @for (var i = 0; i < uniqueGroupAttributes.Count; i++)
+                            {
+                                var item = uniqueGroupAttributes[i];
+                                <tr @(i % 2 == 0 ? Html.Raw(" class=\"odd\"") : Html.Raw(" class=\"even\""))>
+                                    <td class="spec-name">
+                                        @item.SpecificationAttributeName
+                                    </td>
+                                    <td class="spec-value">
+                                        @{
+                                            var foundProductSpeces = Model.GroupedAttributes
+                                                .Where(g => g.Id == group.Id)
+                                                .SelectMany(g => g.Attributes)
+                                                .Where(attribute => attribute.SpecificationAttributeId == item.SpecificationAttributeId)
+                                                .ToList();
+                                        }
+
+                                        @if (foundProductSpeces.Count > 0)
+                                        {
+                                            for (int j = 0; j < foundProductSpeces.Count; j++)
+                                            {
+                                                @if (!string.IsNullOrEmpty(item.ColorSquaresRgb) && (item.AttributeTypeId == (int)SpecificationAttributeType.Option))
+                                                {
+                                                    <div class="attribute-squares color-squares">
+                                                        <span class="attribute-square-container" title="@Html.Raw(foundProductSpeces[j].ValueRaw)">
+                                                            <span class="attribute-square" style="background-color: @(foundProductSpeces[j].ColorSquaresRgb);">&nbsp;</span>
+                                                        </span>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    @Html.Raw(foundProductSpeces[j].ValueRaw)
+                                                }
+
+                                                if (j != foundProductSpeces.Count - 1)
+                                                {
+                                                    <text>,&nbsp;</text>
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <text>&nbsp;</text>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
                     }
                 </tbody>
             </table>

@@ -1404,10 +1404,19 @@ namespace Nop.Web.Areas.Admin.Factories
                     var specAttributeOption = _specificationAttributeService.GetSpecificationAttributeOptionById(attribute.SpecificationAttributeOptionId);
                     var specAttribute = _specificationAttributeService.GetSpecificationAttributeById(specAttributeOption.SpecificationAttributeId);
 
+                    var specAttributeName = specAttribute.Name;
+
+                    if (specAttribute.SpecificationAttributeGroupId.HasValue)
+                    {
+                        var group = _specificationAttributeService.GetSpecificationAttributeGroupById(specAttribute.SpecificationAttributeGroupId.Value);
+                        if (group != null)
+                            specAttributeName = $"{group.Name} >> {specAttributeName}";
+                    }
+
                     //fill in additional values (not existing in the entity)
                     productSpecificationAttributeModel.AttributeTypeName = _localizationService.GetLocalizedEnum(attribute.AttributeType);
                     productSpecificationAttributeModel.AttributeId = specAttribute.Id;
-                    productSpecificationAttributeModel.AttributeName = specAttribute.Name;
+                    productSpecificationAttributeModel.AttributeName = specAttributeName;
 
                     switch (attribute.AttributeType)
                     {
@@ -1446,7 +1455,19 @@ namespace Nop.Web.Areas.Admin.Factories
                 return new AddSpecificationAttributeModel
                 {
                     AvailableAttributes = _specificationAttributeService.GetSpecificationAttributesWithOptions()
-                        .Select(attributeWithOption => new SelectListItem(attributeWithOption.Name, attributeWithOption.Id.ToString()))
+                        .Select(attributeWithOption =>
+                        {
+                            var attributeName = attributeWithOption.Name;
+                            
+                            if (attributeWithOption.SpecificationAttributeGroupId.HasValue)
+                            {
+                                var group = _specificationAttributeService.GetSpecificationAttributeGroupById(attributeWithOption.SpecificationAttributeGroupId.Value);
+                                if (group != null)
+                                    attributeName = $"{group.Name} >> {attributeName}";
+                            }
+
+                            return new SelectListItem(attributeName, attributeWithOption.Id.ToString());
+                        })
                         .ToList(),
                     ProductId = productId,
                     Locales = _localizedModelFactory.PrepareLocalizedModels<AddSpecificationAttributeLocalizedModel>()
@@ -1474,7 +1495,19 @@ namespace Nop.Web.Areas.Admin.Factories
             model.AttributeName = specAttribute.Name;
 
             model.AvailableAttributes = _specificationAttributeService.GetSpecificationAttributesWithOptions()
-                .Select(attributeWithOption => new SelectListItem(attributeWithOption.Name, attributeWithOption.Id.ToString()))
+                .Select(attributeWithOption =>
+                {
+                    var attributeName = attributeWithOption.Name;
+
+                    if (attributeWithOption.SpecificationAttributeGroupId.HasValue)
+                    {
+                        var group = _specificationAttributeService.GetSpecificationAttributeGroupById(attributeWithOption.SpecificationAttributeGroupId.Value);
+                        if (group != null)
+                            attributeName = $"{group.Name} >> {attributeName}";
+                    }
+
+                    return new SelectListItem(attributeName, attributeWithOption.Id.ToString());
+                })
                 .ToList();
 
             model.AvailableOptions = _specificationAttributeService

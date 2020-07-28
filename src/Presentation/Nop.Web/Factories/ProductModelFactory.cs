@@ -1124,7 +1124,7 @@ namespace Nop.Web.Factories
                 //specs
                 if (prepareSpecificationAttributes)
                 {
-                    model.SpecificationAttributeModels = PrepareProductSpecificationModel(product);
+                    model.ProductSpecificationModel = PrepareProductSpecificationModel(product);
                 }
 
                 //reviews
@@ -1299,7 +1299,7 @@ namespace Nop.Web.Factories
             //do not prepare this model for the associated products. anyway it's not used
             if (!isAssociatedProduct)
             {
-                model.ProductSpecifications = PrepareProductSpecificationModel(product);
+                model.ProductSpecificationModel = PrepareProductSpecificationModel(product);
             }
 
             //product review overview
@@ -1605,16 +1605,47 @@ namespace Nop.Web.Factories
         }
 
         /// <summary>
-        /// Prepare the product specification models
+        /// Prepare the product specification model
         /// </summary>
         /// <param name="product">Product</param>
-        /// <returns>List of product specification model</returns>
-        public virtual IList<ProductSpecificationModel> PrepareProductSpecificationModel(Product product)
+        /// <returns>The product specification model</returns>
+        public virtual ProductSpecificationModel PrepareProductSpecificationModel(Product product)
         {
             if (product == null)
                 throw new ArgumentNullException(nameof(product));
 
-            return _specificationAttributeService.GetProductSpecificationAttributes(product.Id, 0, null, true)
+            var model = new ProductSpecificationModel
+            {
+                NonGroupedAttributes = PrepareProductSpecificationAttributeModel(product, null)
+            };
+
+            var groups = _specificationAttributeService.GetProductSpecificationAttributeGroups(product.Id);
+            foreach (var group in groups)
+            {
+                model.GroupedAttributes.Add(new ProductSpecificationAttributeGroupModel
+                {
+                    Id = group.Id,
+                    Name = group.Name,
+                    Attributes = PrepareProductSpecificationAttributeModel(product, group)
+                });
+            }
+
+            return model;
+        }
+
+        /// <summary>
+        /// Prepare the product specification models
+        /// </summary>
+        /// <param name="product">Product</param>
+        /// <param name="group">Specification attribute group</param>
+        /// <returns>List of product specification model</returns>
+        public virtual IList<ProductSpecificationAttributeModel> PrepareProductSpecificationAttributeModel(Product product, SpecificationAttributeGroup group)
+        {
+            if (product == null)
+                throw new ArgumentNullException(nameof(product));
+
+            return _specificationAttributeService.GetProductSpecificationAttributes(
+                    product.Id, specificationAttributeGroupId: group?.Id, showOnProductPage: true)
                 .Select(psa =>
                 {
                     var specAttributeOption =
@@ -1624,7 +1655,7 @@ namespace Nop.Web.Factories
                         _specificationAttributeService.GetSpecificationAttributeById(specAttributeOption
                             .SpecificationAttributeId);
 
-                    var m = new ProductSpecificationModel
+                    var m = new ProductSpecificationAttributeModel
                     {
                         SpecificationAttributeId = specAttribute.Id,
                         SpecificationAttributeName = _localizationService.GetLocalized(specAttribute, x => x.Name),

@@ -14,17 +14,18 @@
         columnWidth = Math.Round((decimal)(90M / Model.Products.Count), 0).ToString() + "%";
     }
 
-
-    var specificationAttributes = new List<ProductSpecificationModel>();
-    foreach (var product in Model.Products)
+    var uniqueNonGroupedAttributes = new List<ProductSpecificationAttributeModel>();
+    foreach (var attribute in Model.Products.SelectMany(p => p.ProductSpecificationModel.NonGroupedAttributes))
     {
-        foreach (var attribute in product.SpecificationAttributeModels)
-        {
-            if (specificationAttributes.FirstOrDefault(sa => sa.SpecificationAttributeId == attribute.SpecificationAttributeId) == null)
-            {
-                specificationAttributes.Add(attribute);
-            }
-        }
+        if (!uniqueNonGroupedAttributes.Any(sa => sa.SpecificationAttributeId == attribute.SpecificationAttributeId))
+            uniqueNonGroupedAttributes.Add(attribute);
+    }
+
+    var uniqueGroupes = new List<ProductSpecificationAttributeGroupModel>();
+    foreach (var group in Model.Products.SelectMany(p => p.ProductSpecificationModel.GroupedAttributes))
+    {
+        if (!uniqueGroupes.Any(g => g.Id == group.Id))
+            uniqueGroupes.Add(group);
     }
 }
 <div class="page compare-products-page">
@@ -92,40 +93,6 @@
                                 }
                             </tr>
                         }
-                        @foreach (var specificationAttribute in specificationAttributes)
-                        {
-                            <tr class="specification">
-                                <td>
-                                    <label>@specificationAttribute.SpecificationAttributeName</label>
-                                </td>
-                                @foreach (var product in Model.Products)
-                                {
-                                    var foundProductSpec = product.SpecificationAttributeModels.FirstOrDefault(psa => psa.SpecificationAttributeId == specificationAttribute.SpecificationAttributeId);
-                                                                
-                                    <td style="width: @columnWidth;">
-                                        @if (foundProductSpec != null)
-                                        {
-                                            if (string.IsNullOrEmpty(foundProductSpec.ColorSquaresRgb))
-                                            {
-                                                @Html.Raw(foundProductSpec.ValueRaw)
-                                            }
-                                            else
-                                            {
-                                                <div class="attribute-squares color-squares">
-                                                    <span class="attribute-square-container" title="@Html.Raw(foundProductSpec.ValueRaw)">
-                                                        <span class="attribute-square" style="background-color: @(foundProductSpec.ColorSquaresRgb);">&nbsp;</span>
-                                                    </span>
-                                                </div>
-                                            }
-                                        }
-                                        else
-                                        {
-                                            <text>&nbsp;</text>
-                                        }
-                                    </td>
-                                }
-                            </tr>                    
-                        }
                         @if (Model.IncludeFullDescriptionInCompareProducts)
                         {
                             <tr class="full-description">
@@ -139,6 +106,114 @@
                                     </td>
                                 }
                             </tr>
+                        }
+                        @foreach (var specificationAttribute in uniqueNonGroupedAttributes)
+                        {
+                            <tr class="specification">
+                                <td>
+                                    <label>@specificationAttribute.SpecificationAttributeName</label>
+                                </td>
+                                @foreach (var product in Model.Products)
+                                {
+                                    var foundProductSpeces = product.ProductSpecificationModel.NonGroupedAttributes
+                                        .Where(attribute => attribute.SpecificationAttributeId == specificationAttribute.SpecificationAttributeId)
+                                        .ToList();
+
+                                    <td style="width: @columnWidth;">
+                                        @if (foundProductSpeces.Count > 0)
+                                        {
+                                            for (int i = 0; i < foundProductSpeces.Count; i++)
+                                            {
+                                                if (string.IsNullOrEmpty(foundProductSpeces[i].ColorSquaresRgb))
+                                                {
+                                                    @Html.Raw(foundProductSpeces[i].ValueRaw)
+                                                }
+                                                else
+                                                {
+                                                    <div class="attribute-squares color-squares">
+                                                        <span class="attribute-square-container" title="@Html.Raw(foundProductSpeces[i].ValueRaw)">
+                                                            <span class="attribute-square" style="background-color: @(foundProductSpeces[i].ColorSquaresRgb);">&nbsp;</span>
+                                                        </span>
+                                                    </div>
+                                                }
+
+                                                if (i != foundProductSpeces.Count - 1)
+                                                {
+                                                    <text>,&nbsp;</text>
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <text>&nbsp;</text>
+                                        }
+                                    </td>
+                                }
+                            </tr>
+                        }
+                        @foreach (var group in uniqueGroupes)
+                        {
+                            if (group.Attributes.Count > 0)
+                            {
+                                <tr class="specification-group">
+                                    <td>
+                                        <label>@group.Name</label>
+                                    </td>
+                                </tr>
+
+                                var uniqueGroupAttributes = new List<ProductSpecificationAttributeModel>();
+                                foreach (var attribute in Model.Products.SelectMany(p => p.ProductSpecificationModel.GroupedAttributes.Where(g => g.Id == group.Id).SelectMany(g => g.Attributes)))
+                                {
+                                    if (!uniqueGroupAttributes.Any(sa => sa.SpecificationAttributeId == attribute.SpecificationAttributeId))
+                                        uniqueGroupAttributes.Add(attribute);
+                                }
+                                @foreach (var specificationAttribute in uniqueGroupAttributes)
+                                {
+                                    <tr class="specification">
+                                        <td>
+                                            <label>@specificationAttribute.SpecificationAttributeName</label>
+                                        </td>
+                                        @foreach (var product in Model.Products)
+                                        {
+                                            var foundProductSpeces = product.ProductSpecificationModel.GroupedAttributes
+                                                .Where(g => g.Id == group.Id)
+                                                .SelectMany(g => g.Attributes)
+                                                .Where(sa => sa.SpecificationAttributeId == specificationAttribute.SpecificationAttributeId)
+                                                .ToList();
+
+                                            <td style="width: @columnWidth;">
+                                                @if (foundProductSpeces.Count > 0)
+                                                {
+                                                    for (int i = 0; i < foundProductSpeces.Count; i++)
+                                                    {
+                                                        if (string.IsNullOrEmpty(foundProductSpeces[i].ColorSquaresRgb))
+                                                        {
+                                                            @Html.Raw(foundProductSpeces[i].ValueRaw)
+                                                        }
+                                                        else
+                                                        {
+                                                            <div class="attribute-squares color-squares">
+                                                                <span class="attribute-square-container" title="@Html.Raw(foundProductSpeces[i].ValueRaw)">
+                                                                    <span class="attribute-square" style="background-color: @(foundProductSpeces[i].ColorSquaresRgb);">&nbsp;</span>
+                                                                </span>
+                                                            </div>
+                                                        }
+
+                                                        if (i != foundProductSpeces.Count - 1)
+                                                        {
+                                                            <text>,&nbsp;</text>
+                                                        }
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <text>&nbsp;</text>
+                                                }
+                                            </td>
+                                        }
+                                    </tr>
+                                }
+                            }
                         }
                     </tbody>
                 </table>

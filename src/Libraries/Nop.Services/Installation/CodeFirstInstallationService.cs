@@ -11478,6 +11478,12 @@ namespace Nop.Services.Installation
                 },
                 new ActivityLogType
                 {
+                    SystemKeyword = "AddNewSpecAttributeGroup",
+                    Enabled = true,
+                    Name = "Add a new specification attribute group"
+                },
+                new ActivityLogType
+                {
                     SystemKeyword = "AddNewStateProvince",
                     Enabled = true,
                     Name = "Add a new state or province"
@@ -11733,6 +11739,12 @@ namespace Nop.Services.Installation
                     SystemKeyword = "DeleteSpecAttribute",
                     Enabled = true,
                     Name = "Delete a specification attribute"
+                },
+                new ActivityLogType
+                {
+                    SystemKeyword = "DeleteSpecAttributeGroup",
+                    Enabled = true,
+                    Name = "Delete a specification attribute group"
                 },
                 new ActivityLogType
                 {
@@ -12003,6 +12015,12 @@ namespace Nop.Services.Installation
                     SystemKeyword = "EditSpecAttribute",
                     Enabled = true,
                     Name = "Edit a specification attribute"
+                },
+                new ActivityLogType
+                {
+                    SystemKeyword = "EditSpecAttributeGroup",
+                    Enabled = true,
+                    Name = "Edit a specification attribute group"
                 },
                 new ActivityLogType
                 {

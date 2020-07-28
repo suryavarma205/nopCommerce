@@ -356,8 +356,9 @@ namespace Nop.Services.Catalog
         /// {1} : specification attribute option ID
         /// {2} : allow filtering
         /// {3} : show on product page
+        /// {4} : specification attribute group ID
         /// </remarks>
-        public static CacheKey ProductSpecificationAttributeAllByProductIdCacheKey => new CacheKey("Nop.productspecificationattribute.allbyproductid-{0}-{1}-{2}-{3}", ProductSpecificationAttributeAllByProductIdPrefixCacheKey, ProductSpecificationAttributeAllByProductIdsPrefixCacheKey);
+        public static CacheKey ProductSpecificationAttributeAllByProductIdCacheKey => new CacheKey("Nop.productspecificationattribute.allbyproductid-{0}-{1}-{2}-{3}-{4}", ProductSpecificationAttributeAllByProductIdPrefixCacheKey, ProductSpecificationAttributeAllByProductIdsPrefixCacheKey);
 
         /// <summary>
         /// Gets a key pattern to clear cache
@@ -387,6 +388,19 @@ namespace Nop.Services.Catalog
         /// {0} : specification attribute ID
         /// </remarks>
         public static CacheKey SpecAttributesOptionsCacheKey => new CacheKey("Nop.productspecificationattribute.options-{0}");
+
+        /// <summary>
+        /// Gets a key for specification attribute groups caching by product id
+        /// </summary>
+        /// <remarks>
+        /// {0} : product ID
+        /// </remarks>
+        public static CacheKey ProductSpecificationAttributeGroupAllByProductIdCacheKey => new CacheKey("Nop.productspecificationattributegroup.allbyproductid-{0}", ProductSpecificationAttributeGroupAllByProductIdsPrefixCacheKey);
+
+        /// <summary>
+        /// Gets a key pattern to clear cache
+        /// </summary>
+        public static string ProductSpecificationAttributeGroupAllByProductIdsPrefixCacheKey => "Nop.productspecificationattribute.allbyproductid";
 
         #endregion
 

@@ -66,10 +66,18 @@ namespace Nop.Web.Factories
         ProductEmailAFriendModel PrepareProductEmailAFriendModel(ProductEmailAFriendModel model, Product product, bool excludeProperties);
 
         /// <summary>
-        /// Prepare the product specification models
+        /// Prepare the product specification model
         /// </summary>
         /// <param name="product">Product</param>
-        /// <returns>List of product specification model</returns>
-        IList<ProductSpecificationModel> PrepareProductSpecificationModel(Product product);
+        /// <returns>The product specification model</returns>
+        ProductSpecificationModel PrepareProductSpecificationModel(Product product);
+
+        /// <summary>
+        /// Prepare the product specification attribute models
+        /// </summary>
+        /// <param name="product">Product</param>
+        /// <param name="group">Specification attribute group</param>
+        /// <returns>List of product specification attribute model</returns>
+        IList<ProductSpecificationAttributeModel> PrepareProductSpecificationAttributeModel(Product product, SpecificationAttributeGroup group);
     }
 }

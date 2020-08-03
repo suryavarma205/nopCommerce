@@ -400,7 +400,7 @@ namespace Nop.Services.Catalog
         /// <summary>
         /// Gets a key pattern to clear cache
         /// </summary>
-        public static string ProductSpecificationAttributeGroupAllByProductIdsPrefixCacheKey => "Nop.productspecificationattribute.allbyproductid";
+        public static string ProductSpecificationAttributeGroupAllByProductIdsPrefixCacheKey => "Nop.productspecificationattributegroup.allbyproductid";
 
         #endregion
 

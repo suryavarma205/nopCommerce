@@ -9,15 +9,8 @@
         if (!uniqueNonGroupedAttributes.Any(sa => sa.SpecificationAttributeId == attribute.SpecificationAttributeId))
             uniqueNonGroupedAttributes.Add(attribute);
     }
-
-    var uniqueGroupes = new List<ProductSpecificationAttributeGroupModel>();
-    foreach (var group in Model.GroupedAttributes)
-    {
-        if (!uniqueGroupes.Any(g => g.Id == group.Id))
-            uniqueGroupes.Add(group);
-    }
 }
-@if (uniqueNonGroupedAttributes.Count > 0 || uniqueGroupes.SelectMany(g => g.Attributes).ToList().Count > 0)
+@if (uniqueNonGroupedAttributes.Count > 0 || Model.GroupedAttributes.SelectMany(g => g.Attributes).ToList().Count > 0)
 {
     <div class="product-specs-box">
         <div class="title">
@@ -79,7 +72,7 @@
                             </tr>
                         }
                     }
-                    @foreach (var group in uniqueGroupes)
+                    @foreach (var group in Model.GroupedAttributes)
                     {
                         if (group.Attributes.Count > 0)
                         {

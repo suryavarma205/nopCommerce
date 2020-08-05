@@ -180,7 +180,7 @@ namespace Nop.Web.Framework.Infrastructure.Extensions
                 //store keys in Redis
                 services.AddDataProtection().PersistKeysToStackExchangeRedis(() =>
                 {
-                    var redisConnectionWrapper = EngineContext.Current.Resolve<IRedisConnectionWrapper>();
+                    var redisConnectionWrapper = new RedisConnectionWrapper(nopConfig);
                     return redisConnectionWrapper.GetDatabase(nopConfig.RedisDatabaseId ?? (int)RedisDatabaseNumber.DataProtectionKeys);
                 }, NopDataProtectionDefaults.RedisDataProtectionKey);
             }

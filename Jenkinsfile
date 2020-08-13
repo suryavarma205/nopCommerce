@@ -4,7 +4,7 @@ pipeline {
     stage('Build') {
       steps{
         echo "Building project"
-        bat label: '', script: '"C:\\.Net\\nopCommerce-develop\\src\\NopCommerce.sln"'
+        bat label: '', script: '"C:\\.Net\\nopCommerce-develop\\src\\Presentation\\Nop.Web\\Nop.Web.csproj"'
       }
     }
      stage('Archive') {

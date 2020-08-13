@@ -4,7 +4,7 @@ pipeline {
     stage('Build') {
       steps{
         echo "Building project"
-         sh './mvnw package'
+        bat label: '', script: '"C:\\.Net\\nopCommerce-develop\\src\\NopCommerce.sln"'
       }
     }
      stage('Archive') {
